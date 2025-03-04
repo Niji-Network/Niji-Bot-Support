@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 import aiohttp
 import os
-import random
 from dotenv import load_dotenv
 import logging
 
@@ -18,7 +17,6 @@ class Images(commands.Cog):
         self.session = aiohttp.ClientSession()
 
     def cog_unload(self) -> None:
-        # Close the HTTP session when the cog is unloaded.
         if self.session:
             self.bot.loop.create_task(self.session.close())
 
@@ -37,7 +35,7 @@ class Images(commands.Cog):
     async def image(self, ctx: commands.Context, category: str = "random") -> None:
         category = category.lower()
         if category not in self.allowed_categories:
-            await ctx.send("Invalid category. Please choose one of: random, waifu, husbando.")
+            await ctx.send("Invalid category. Please choose from: random, waifu, husbando.")
             return
 
         url = self.base_endpoint.format(category=category)
@@ -49,10 +47,10 @@ class Images(commands.Cog):
                     data = await resp.json()
                     items = data.get("items", [])
                     if items:
-                        chosen_item = random.choice(items)
+                        # Always take the first item
+                        chosen_item = items[0]
                         image_url = chosen_item.get("url")
                         if image_url:
-                            # Extract additional info, defaulting to "None" when absent.
                             anime = chosen_item.get("anime") or "None"
                             nsfw = chosen_item.get("nsfw")
                             nsfw_text = "Yes" if nsfw else "No"
@@ -67,8 +65,8 @@ class Images(commands.Cog):
                                     f"> **Anime:** {anime}\n"
                                     f"> **NSFW:** {nsfw_text}\n"
                                     f"> **Characters:** {characters_text}\n"
-                                    f"> **Tags:** {tags_text}\n",
-                                    f"> **URL:** [Click here]({image_url})",
+                                    f"> **Tags:** {tags_text}\n"
+                                    f"> **URL:** [Click here]({image_url})"
                                 ),
                                 color=discord.Color.blurple()
                             )
