@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 class Logs(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        # Load the log channel IDs from the environment variables.
         self.public_logs_channel_id = int(os.getenv("PUBLIC_LOG_CHANNEL_ID", "0"))
         self.private_logs_channel_id = int(os.getenv("PRIVATE_LOG_CHANNEL_ID", "0"))
 
@@ -23,7 +22,6 @@ class Logs(commands.Cog):
         else:
             logger.error("Log channel with ID %s not found.", channel_id)
 
-    # Public logs for member join and leave events.
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member) -> None:
         embed = discord.Embed(
@@ -44,7 +42,6 @@ class Logs(commands.Cog):
         )
         await self.log_to_channel(self.public_logs_channel_id, embed)
 
-    # Private logs for command usage and errors.
     @commands.Cog.listener()
     async def on_command(self, ctx: commands.Context) -> None:
         embed = discord.Embed(
@@ -74,7 +71,6 @@ class Logs(commands.Cog):
         )
         await self.log_to_channel(self.private_logs_channel_id, embed)
 
-    # Private logs for message edits and deletions.
     @commands.Cog.listener()
     async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
         if before.author.bot:
@@ -108,7 +104,6 @@ class Logs(commands.Cog):
         embed.add_field(name="Content", value=message.content or "None", inline=False)
         await self.log_to_channel(self.private_logs_channel_id, embed)
 
-    # Private logs for guild member updates (nickname, roles, etc.)
     @commands.Cog.listener()
     async def on_member_update(self, before: discord.Member, after: discord.Member) -> None:
         changes = []

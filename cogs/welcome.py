@@ -11,7 +11,6 @@ logger = logging.getLogger(__name__)
 class Welcome(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        # Retrieve the welcome channel ID from the environment and convert it to an integer.
         self.welcome_channel_id = int(os.getenv("WELCOME_CHANNEL_ID", "0"))
 
     @commands.Cog.listener()

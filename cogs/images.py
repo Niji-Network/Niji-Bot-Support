@@ -8,12 +8,15 @@ import logging
 load_dotenv()
 logger = logging.getLogger(__name__)
 
+
 class Images(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.api_key = os.getenv("NIJII_API_KEY")
-        self.base_endpoint = "https://api.nijii.xyz/v1/img/{category}"
-        self.allowed_categories = ["random", "waifu", "husbando"]
+        self.category_endpoint = "https://api.nijii.xyz/v1/img/categories/{category}"
+        self.random_endpoint = "https://api.nijii.xyz/v1/img/random"
+        self.allowed_categories = ["waifu", "husbando", "maid"]
+        self.allowed_choices = self.allowed_categories + ["random"]
         self.session = aiohttp.ClientSession()
 
     def cog_unload(self) -> None:
@@ -25,20 +28,24 @@ class Images(commands.Cog):
         description="Send a random image from a given category"
     )
     @discord.app_commands.describe(
-        category="Category of the image: random, waifu, or husbando"
+        category="Category of the image: random, waifu, husbando, or maid"
     )
     @discord.app_commands.choices(category=[
         discord.app_commands.Choice(name="random", value="random"),
+        discord.app_commands.Choice(name="maid", value="maid"),
         discord.app_commands.Choice(name="waifu", value="waifu"),
         discord.app_commands.Choice(name="husbando", value="husbando")
     ])
     async def image(self, ctx: commands.Context, category: str = "random") -> None:
         category = category.lower()
-        if category not in self.allowed_categories:
-            await ctx.send("Invalid category. Please choose from: random, waifu, husbando.")
-            return
+        if category == "random":
+            url = self.random_endpoint
+        else:
+            if category not in self.allowed_categories:
+                await ctx.send("Invalid category. Please choose from: random, waifu, husbando, maid.")
+                return
+            url = self.category_endpoint.format(category=category)
 
-        url = self.base_endpoint.format(category=category)
         headers = {"X-API-KEY": self.api_key} if self.api_key else {}
 
         try:
@@ -47,7 +54,6 @@ class Images(commands.Cog):
                     data = await resp.json()
                     items = data.get("items", [])
                     if items:
-                        # Always take the first item
                         chosen_item = items[0]
                         image_url = chosen_item.get("url")
                         if image_url:
@@ -81,6 +87,7 @@ class Images(commands.Cog):
         except Exception as e:
             logger.error("Exception occurred while fetching image: %s", e)
             await ctx.send("> An error occurred while retrieving the image.")
+
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Images(bot))
