@@ -19,7 +19,8 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.PORT }}
           script: |
-            cd /home/ubuntu/Niji-Bot-Support
+            cd /home/gonzyui/Niji-Bot-Support
             git pull origin main
             pm2 reload ecosystem.config.js --update-env
