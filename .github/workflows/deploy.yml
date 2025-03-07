@@ -23,4 +23,7 @@ jobs:
           script: |
             cd /home/gonzyui/Niji-Bot-Support
             git pull origin main
-            pm2 reload ecosystem.config.js --update-env
+            pm2 delete nijiSupport
+            source venv/bin/activate
+            pip install -r requirements.txt
+            pm2 start ecosystem.config.js
