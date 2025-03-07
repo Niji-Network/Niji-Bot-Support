@@ -25,6 +25,12 @@ class Ready(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self) -> None:
         logger.info(f"[Ready Cog] Logged in as {self.bot.user} (ID: {self.bot.user.id})")
+        try:
+            synced = await self.bot.tree.sync()
+            logger.info(f"Synced {len(synced)} commands")
+        except Exception as e:
+            logger.error("Failed to sync commands: %s", e)
+            
         if self.task is None:
             self.task = self.bot.loop.create_task(self.update_stats_task())
 
